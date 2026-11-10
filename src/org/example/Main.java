@@ -1,4 +1,5 @@
 
+
 package org.example;
 
 import java.time.LocalDate;
@@ -37,7 +38,10 @@ public class Main {
         );
     }
 
-    // Завдання 1. Generics
+    // ==========================================
+    // TASK 1. GENERICS
+    // ==========================================
+
     public static void testGenerics() {
 
         System.out.println("\n===== TASK 1: GENERICS =====");
@@ -93,7 +97,10 @@ public class Main {
         printNumbers(numbers);
     }
 
-    // Завдання 2. Продуктивність колекцій
+    // ==========================================
+    // TASK 2. COLLECTIONS
+    // ==========================================
+
     public static void testCollections() {
 
         System.out.println("\n===== TASK 2: COLLECTIONS =====");
@@ -270,7 +277,10 @@ public class Main {
         }
     }
 
-    // Завдання 3. equals() та hashCode()
+    // ==========================================
+    // TASK 3. EQUALS() AND HASHCODE()
+    // ==========================================
+
     public static void testHashSet() {
 
         System.out.println("\n===== TASK 3: HASHSET =====");
@@ -345,6 +355,181 @@ public class Main {
         );
     }
 
+    // ==========================================
+    // PRACTICAL WORK 7
+    // FUNCTIONAL STYLE IN JAVA
+    // ==========================================
+
+    public static void testFunctionalStyle() {
+
+        System.out.println("\n==================================");
+        System.out.println("PRACTICAL WORK 7");
+        System.out.println("FUNCTIONAL STYLE IN JAVA");
+        System.out.println("==================================");
+
+        // Створення тестового списку транзакцій
+        List<BankTransaction> transactions = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            transactions.add(createTransaction(i * 100));
+        }
+
+        // ==========================================
+        // TASK 1. SORTING
+        // ==========================================
+
+        System.out.println("\n===== TASK 1: SORTING =====");
+
+        // 1. Анонімний клас Comparator
+        List<BankTransaction> sort1 =
+                new ArrayList<>(transactions);
+
+        sort1.sort(new Comparator<BankTransaction>() {
+            @Override
+            public int compare(
+                    BankTransaction t1,
+                    BankTransaction t2
+            ) {
+                return Double.compare(
+                        t1.getAmount(),
+                        t2.getAmount()
+                );
+            }
+        });
+
+        System.out.println("\nSorting using anonymous Comparator:");
+        printList(sort1);
+
+        // 2. Лямбда-вираз
+        List<BankTransaction> sort2 =
+                new ArrayList<>(transactions);
+
+        sort2.sort((t1, t2) ->
+                Double.compare(t1.getAmount(), t2.getAmount())
+        );
+
+        System.out.println("\nSorting using lambda expression:");
+        printList(sort2);
+
+        // 3. Comparator.comparing
+        List<BankTransaction> sort3 =
+                new ArrayList<>(transactions);
+
+        sort3.sort(
+                Comparator.comparingDouble(
+                        BankTransaction::getAmount
+                )
+        );
+
+        System.out.println("\nSorting using Comparator.comparing:");
+        printList(sort3);
+
+        // ==========================================
+        // TASK 2. STREAM API
+        // ==========================================
+
+        System.out.println("\n===== TASK 2: STREAM API =====");
+
+        // Створення великого списку
+        List<BankTransaction> largeList =
+                new ArrayList<>();
+
+        for (int i = 0; i < SIZE; i++) {
+            largeList.add(createTransaction(i));
+        }
+
+        // Обробка через звичайний цикл for-each
+        double sumForEach = 0;
+
+        for (BankTransaction transaction : largeList) {
+            if (transaction.getAmount() > 5000) {
+                sumForEach += transaction.getAmount();
+            }
+        }
+
+        System.out.println(
+                "Sum using for-each: " + sumForEach
+        );
+
+        // Обробка через Stream API
+        double sumStream = largeList.stream()
+                .filter(t -> t.getAmount() > 5000)
+                .mapToDouble(BankTransaction::getAmount)
+                .sum();
+
+        System.out.println(
+                "Sum using Stream API: " + sumStream
+        );
+
+        System.out.println(
+                "Results are equal: " +
+                        (Double.compare(sumForEach, sumStream) == 0)
+        );
+
+        // ==========================================
+        // TASK 3. OPTIONAL
+        // ==========================================
+
+        System.out.println("\n===== TASK 3: OPTIONAL =====");
+
+        // Пошук через звичайний цикл
+        BankTransaction loopResult = null;
+
+        for (BankTransaction transaction : largeList) {
+            if (transaction.getAmount() > 10_000_000) {
+                loopResult = transaction;
+                break;
+            }
+        }
+
+        System.out.println(
+                "Search using loop: " +
+                        (loopResult == null ? "Not found" : loopResult)
+        );
+
+        // Пошук через Stream API та Optional
+        Optional<BankTransaction> result = largeList.stream()
+                .filter(t -> t.getAmount() > 10_000_000)
+                .findFirst();
+
+        System.out.println(
+                "Search using Optional: " + result
+        );
+
+        // Перевірка get()
+        try {
+            BankTransaction found = result.get();
+
+            System.out.println(
+                    "Found transaction: " + found
+            );
+
+        } catch (NoSuchElementException e) {
+            System.out.println(
+                    "get() exception: " + e
+            );
+        }
+
+        // Перевірка orElse()
+        BankTransaction defaultTransaction =
+                new BankTransaction(
+                        -1,
+                        0,
+                        LocalDate.now()
+                );
+
+        BankTransaction safeResult =
+                result.orElse(defaultTransaction);
+
+        System.out.println(
+                "Result using orElse(): " + safeResult
+        );
+    }
+
+    // ==========================================
+    // MAIN
+    // ==========================================
+
     public static void main(String[] args) {
 
         testGenerics();
@@ -352,5 +537,7 @@ public class Main {
         testCollections();
 
         testHashSet();
+
+        testFunctionalStyle();
     }
 }
